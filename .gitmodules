@@ -1,0 +1,4 @@
+[submodule "src/libraries"]
+	path = src/libraries
+	url = https://github.com/bleubidon/robots-arduino-libraries
+	branch = master

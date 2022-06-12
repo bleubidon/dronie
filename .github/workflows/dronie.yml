@@ -1,0 +1,39 @@
+name: dronie build CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: setup
+        run: |
+          brew update
+          brew install arduino-cli
+          arduino-cli core install arduino:avr
+      
+      - name: build
+        run: make ARDUINO_CLI_OPTIONS=-v
+
+      - name: prepare_artifacts
+        run: |
+          ARTIFACT=$(find /tmp/arduino-sketch-* -name "*.ino.hex")
+          mkdir /tmp/artifacts
+          mv $ARTIFACT /tmp/artifacts/$(basename $ARTIFACT .ino.hex).hex
+
+      - name: upload_artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dronie_flashable
+          path: /tmp/artifacts/*
