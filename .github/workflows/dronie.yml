@@ -19,17 +19,20 @@ jobs:
 
       - name: setup
         run: |
-          brew update
-          brew install arduino-cli
+          ## Arduino CLI
+          # https://arduino.github.io/arduino-cli/0.23/installation/
+          mkdir -p /home/runner/.local/bin
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=/home/runner/.local/bin sh
+          arduino-cli core update-index
           arduino-cli core install arduino:avr
       
       - name: build
-        run: make ARDUINO_CLI_OPTIONS=-v
+        run: make ARDUINO_CLI_OPTIONS="-v --build-path /tmp/my_arduino_sketch_build"
 
       - name: prepare_artifacts
         run: |
-          ARTIFACT=$(find /tmp/arduino-sketch-* -name "*.ino.hex")
-          mkdir /tmp/artifacts
+          ARTIFACT=$(find /tmp/my_arduino_sketch_build -name "*.ino.hex")
+          mkdir -p /tmp/artifacts
           mv $ARTIFACT /tmp/artifacts/$(basename $ARTIFACT .ino.hex).hex
 
       - name: upload_artifacts
